@@ -29,13 +29,12 @@ let partitionString s chunkSize =
                 partitionString' s' init nextChunkMatch
     partitionString' s s.[0..chunkSize - 1] true
 
-    
 let (|InvalidId|_|) (s: string) =
       if s.Length % 2 = 1 
       then 
-          [s.Length / 3 .. -2 .. 0]
+          None //[s.Length / 3 .. -2 .. 0]
       else 
-          // process as even
+          if s.Substring(0, s.Length / 2) = s.Substring(s.Length / 2) then Some s else None
   
 let parseInput (line : string)  =
     let (start, finish) = line.Split("-") |> (fun arr -> (bigint.Parse(arr.[0]), bigint.Parse(arr.[1])))
@@ -45,9 +44,12 @@ let parseInput (line : string)  =
     |> List.map bigint.Parse
     
 let start filePath =
-    let lines = ReadData.readLines filePath
+    let lines = 
+        ReadData.readLines filePath 
+                  |> Seq.head 
+                  |> fun s -> s.Split(",")
     lines
-    |> Seq.map parseInput
+    |> Seq.map (fun line -> parseInput line)
     |> Seq.toList
     |> Seq.concat
     |> Seq.sum
