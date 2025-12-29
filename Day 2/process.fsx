@@ -1,15 +1,14 @@
-// Day 1 challenge 
+// Day 2 challenge 
 #load @"..\Read-data.fsx"
+#load @"..\AoCUtils.fsx"
 
 let filePath = @"..\Day 2\input-data.txt"
 
 open System
-open System.Numerics
-open System.Collections.Generic
+open AoCUtils.Utils
  
 let partitionString s chunkSize =
     let rec partitionString' (s: string) init matched =
-        // printfn "s: %s, init: %s, matched: %b" s init matched
         if not matched then matched
         else
             match s.Length with
@@ -19,16 +18,6 @@ let partitionString s chunkSize =
                 let nextChunkMatch = s.[0..chunkSize - 1] = init
                 partitionString' s' init nextChunkMatch
     partitionString' s s.[0..chunkSize - 1] true
-
-let memoize (f: _ -> _) =
-    let cache = Dictionary<_, _>()
-    fun x ->
-        if cache.ContainsKey(x) then
-            cache.[x]
-        else
-            let result = f x
-            cache.[x] <- result
-            result
 
 let divisors n =
     seq { for i in 1 .. int (Math.Sqrt(float n)) do
