@@ -84,18 +84,25 @@ let allMatch lst =
     | [] -> false
     | h::t -> List.fold (fun acc elem -> acc && (h = elem)) true t
 
-let (|InvalidId|_|) (s: string) =
-    let checkstring = 
-        if s.Length = 1 then []
-        else
-            memoDiv s.Length
-            |> List.filter (fun d -> 
-                                chunkString s d []
-                                |> allMatch)
-    
-    match checkstring with
-    | [] -> None
-    | _  -> Some s
+let (|InvalidId|_|) isPart1 (s: string) =
+    if isPart1 then
+        if s.Length % 2 = 1 
+        then 
+            None //[s.Length / 3 .. -2 .. 0]
+        else 
+            if s.Substring(0, s.Length / 2) = s.Substring(s.Length / 2) then Some s else None
+    else
+        let checkstring = 
+            if s.Length = 1 then []
+            else
+                memoDiv s.Length
+                |> List.filter (fun d ->  
+                                    chunkString s d []
+                                    |> allMatch)
+        
+        match checkstring with
+        | [] -> None
+        | _  -> Some s
       
 let testInvalidIDs () =
     let testCases = 
@@ -111,7 +118,7 @@ let testInvalidIDs () =
     |> List.iter (fun (input, expected) ->
         let result = 
             match input with
-            | InvalidId id -> Some id
+            | InvalidId true id -> Some id
             | _ -> None
         if result <> expected then
             printfn "Test failed for input %s: expected %A but got %A" input expected result
@@ -135,26 +142,27 @@ let testChunker () =
             printfn "Test passed for input %s with chunk size %d" input chunkSize
     )
 
-let parseInput (line : string)  =
+let parseInput isPart1  (line : string)  =
     let (start, finish) = line.Split("-") |> (fun arr -> (bigint.Parse(arr.[0]), bigint.Parse(arr.[1])))
     [start .. finish]
     |> List.map (fun x -> x.ToString())
-    |> List.filter (function InvalidId _ -> true | _ -> false)
+    |> List.filter (function InvalidId isPart1 _ -> true | _ -> false)
     |> List.map bigint.Parse
     
-let start filePath =
+let start isPart1 filePath =
     let lines = 
         ReadData.readLines filePath 
                   |> Seq.head 
                   |> fun s -> s.Split(",")
     lines
-    |> Seq.map (fun line -> parseInput line)
+    |> Seq.map (fun line -> parseInput isPart1 line)
     |> Seq.toList
     |> Seq.concat
     |> Seq.sum
 
 #time    
-filePath |> start |> printfn "Sum of all valid IDs: %A"
+filePath |> start true |> printfn "Sum of all valid IDs for part 1: %A"
+filePath |> start false |> printfn "Sum of all valid IDs for part 2: %A"
 
 #time
 
