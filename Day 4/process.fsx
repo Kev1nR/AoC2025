@@ -1,10 +1,8 @@
 // Day 3 challenge 
-#load @"..\Read-data.fsx"
 #load @"..\AoCUtils.fsx"
 
 let filePath = @"..\Day 4\input-data.txt"
 
-open System
 open AoCUtils.Utils
 
 type Slot =

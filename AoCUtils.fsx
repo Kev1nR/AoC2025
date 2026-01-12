@@ -1,8 +1,16 @@
 module Utils =
 
     open System.Collections.Generic
-    open System
-    
+    open System.IO
+
+    module ReadData =
+        let readLines (filePath:string) = 
+            seq {
+                    use sr = new StreamReader (filePath)
+                    while not sr.EndOfStream do
+                        yield sr.ReadLine ()
+                }    
+
     let memoize (f: _ -> _) =
         let cache = Dictionary<_, _>()
         fun x ->
