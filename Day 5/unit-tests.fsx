@@ -1,7 +1,7 @@
 #r "nuget: Expecto, 9.0.4" // Load Expecto from NuGet
 #load @"..\Day 5\process.fsx"
 
-open Expecto
+open Expecto 
 open Process
 
 let inputdata = "3-5
@@ -19,7 +19,7 @@ let inputdata = "3-5
 // Define tests
 let tests =
     testList "Day 5 tests" [
-        ftestList "Part 1 tests" [
+        testList "Part 1 tests" [
             testCase "Can build a set of fresh ranges from inputdata" <| fun _ ->
                 let expectedRanges = 
                     seq {
@@ -74,8 +74,28 @@ let tests =
 
                 let result = (freshRanges, ingredients) ||> checkFreshness
 
-                Expect.equal result expectedFreshIngredients "Fresh ingredients do not match"] 
+                Expect.equal result expectedFreshIngredients "Fresh ingredients do not match" 
 
+            ]
+        
+        testList "Part 2 tests" [
+            testCase "Can expand ranges to count unique fresh ingredients" <| fun _ ->
+                let freshRanges = 
+                    seq {
+                        { Start = 3L; End = 5L }
+                        { Start = 10L; End = 14L }
+                        { Start = 16L; End = 20L }
+                        { Start = 12L; End = 18L }
+                    } |> Seq.toList
+
+                let expectedCount = 14 
+
+                let result = 
+                    squash freshRanges
+                    |> List.sumBy (fun range -> range.End - range.Start + 1L)
+
+                Expect.equal result expectedCount "Count of unique fresh ingredients does not match"
+        ]
     ]
 
 let main argv =

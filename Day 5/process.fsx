@@ -30,11 +30,52 @@ let checkFreshness freshRanges ingredients =
         )
     )
 
-let result = 
+let squash (ranges: Range list) =
+    let rec squash' currentRange accumulatedRanges remainingRanges =
+        match remainingRanges with
+        | [] -> 
+            accumulatedRanges
+        | h::[] ->
+            if h.Start <= currentRange.End then
+                let newCurrentRange = { Start = currentRange.Start; End = max currentRange.End h.End }
+                squash' newCurrentRange (newCurrentRange::accumulatedRanges) []        
+            else
+                squash' h (h::currentRange::accumulatedRanges) []
+        | h::t -> 
+            if h.Start <= currentRange.End then
+                let newCurrentRange = { Start = currentRange.Start; End = max currentRange.End h.End }
+                squash' newCurrentRange accumulatedRanges t        
+            else
+                squash' h (currentRange::accumulatedRanges) t
+
+
+    let firstRange,rest = 
+        match ranges |> List.sortBy (fun r -> r.Start) with
+        | h::t -> h, t
+        | [] -> failwith "No ranges to squash"
+
+    squash' firstRange [] rest    
+
+let part1result() = 
     filePath 
     |> ReadData.readLines 
     |> parseData 
     ||> checkFreshness 
     |> List.length
 
-printfn "Number of fresh ingredients: %d" result
+let part2result() =
+    filePath 
+    |> ReadData.readLines 
+    |> parseData 
+    |> fun (freshRanges, _) -> 
+        freshRanges
+        |> squash
+        |> List.sumBy (fun range -> range.End - range.Start + 1L)
+
+#time
+part1result() |> (printfn "Number of fresh ingredients: %d") 
+#time
+
+#time
+part2result() |> (printfn "All fresh ingredients: %d") 
+#time
