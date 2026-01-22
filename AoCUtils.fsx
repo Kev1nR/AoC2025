@@ -76,3 +76,34 @@ module Utils =
         
         arr
     
+    let transposeMatrix (matrix : 'a array array) =
+        let allRowsEqualLength =
+            matrix
+            |> Array.forall (fun row -> row.Length = matrix.[0].Length)
+
+        if not allRowsEqualLength then
+            failwith "All rows in the matrix must be of equal length to transpose"
+
+        [|
+            for c in 0 .. matrix.[0].Length - 1 do
+                [|
+                    for r in 0 .. matrix.Length - 1 do
+                        matrix.[r].[c]
+                |]
+        |] 
+
+    let splitWhen splitValue input =  
+        let rec proc' vals collectVals acc =
+            match vals with
+            | [] -> collectVals::acc 
+                    |> List.map (fun l -> l |> List.rev |> List.toArray)
+                    |> List.rev |> List.toArray
+            | v::vs ->
+                if v = splitValue
+                then
+                    proc' vs [] (collectVals::acc)
+                else
+                    proc' vs (v::collectVals) acc              
+
+        proc' (input |> Array.toList) [] []         
+        
