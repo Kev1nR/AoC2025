@@ -47,19 +47,23 @@ let updateBeamData beamData newHits =
 
         {beamData with Hits = beamData.Hits + newHits.Length; Beams = newBeams}
 
-//     filePath  
-//     |> ReadData.readLines
-//     |> Seq.toArray
-//     |> processP1
+let procP1 input =
+    input
+    |> Array.fold (fun beamData beamArray ->
+            let splitters = locateSplitters (beamData.Beams) beamArray
+            
+            updateBeamData beamData splitters)
+            {Hits = 0; Beams = []}
 
-// let part2result() =
-//     filePath 
-//     |> ReadData.readLines
-//     |> Seq.toArray
-//     |> processP2
+let inputData = 
+    filePath
+    |> ReadData.readLines
+    |> Seq.toArray
+    |> Seq.map (fun s -> s.ToCharArray())
+    |> Seq.toArray
 
 #time
-//part1result() |> (printfn "Part 1 result is s: %d") 
+inputData |> procP1 |> (printfn "Part 1 result is s: %A") 
 #time
 
 #time

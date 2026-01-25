@@ -105,7 +105,15 @@ let tests =
                 
                 Expect.equal newBeamData expectBeamData "New beam data does not match epxectation"
 
-            
+            testCase "Run against complete test date produces expected result" <| fun _ ->
+                let expectBeamData = {Hits = 21; Beams = [0;2;4;6;8;10;11;12;14]}
+
+                let p1Result = 
+                    sampleData.Split(Environment.NewLine)
+                    |> Array.map(fun line -> line.ToCharArray())
+                    |> procP1
+
+                Expect.equal p1Result expectBeamData "Part 1 result does not match expectation"
         ]
 
         
