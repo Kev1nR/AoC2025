@@ -6,7 +6,8 @@ let filePath = @"..\Day 7\input-data.txt"
 open AoCUtils.Utils
 open System 
 
-type BeamData = {Hits: int; Beams: int list}
+type Beam = {PathCount : int; Path : int}
+type BeamData = {Hits: int; Beams: Beam list}
 
 let locateSplitters (beams : int list) (input : char array) =
     let rec locate beams' splits =
@@ -39,18 +40,22 @@ let updateBeamData beamData newHits =
             |> List.fold (fun acc n -> (n-1)::(n+1)::acc) []
         
         let newBeams =
-            beamData.Beams 
+            beamData.Beams
+            |> List.map (fun b -> b.Path)
             |> List.filter (fun path -> not (newHits |> List.contains path))
             |> List.insertManyAt 0 newHitList
             |> List.distinct
             |> List.sort
+            |> List.map (fun bp -> {PathCount = 0; Path = bp} )
 
         {beamData with Hits = beamData.Hits + newHits.Length; Beams = newBeams}
+
 
 let procP1 input =
     input
     |> Array.fold (fun beamData beamArray ->
-            let splitters = locateSplitters (beamData.Beams) beamArray
+            let paths = beamData.Beams |> List.map (fun b -> b.Path)
+            let splitters = locateSplitters paths beamArray
             
             updateBeamData beamData splitters)
             {Hits = 0; Beams = []}
@@ -63,7 +68,7 @@ let inputData =
     |> Seq.toArray
 
 #time
-inputData |> procP1 |> (printfn "Part 1 result is s: %A") 
+//inputData |> procP1 |> (printfn "Part 1 result is s: %A") 
 #time
 
 #time

@@ -79,34 +79,47 @@ let tests =
                 Expect.equal actualBeams expectedBeams "Actual beams does not match expected"
 
             testCase "Given beam list and single new hit, a new beamData item is generated" <| fun _ ->
-                let currentBeamData = {Hits = 1; Beams = [4;6;9]}
+                let currentBeamData = 
+                    {Hits = 1; 
+                     Beams = [4;6;9] |> List.map (fun p -> {PathCount = 0; Path = p})}
 
-                let expectBeamData = {Hits = 2; Beams = [4;5;7;9]}
+                let expectBeamData = 
+                    {Hits = 2; 
+                     Beams = [4;5;7;9]|> List.map (fun p -> {PathCount = 0; Path = p})}
 
                 let newBeamData = updateBeamData currentBeamData [6]
                 
                 Expect.equal newBeamData expectBeamData "New beam data does not match epxectation"
 
             testCase "Given beam list and two new hits, a new beamData item is generated" <| fun _ ->
-                let currentBeamData = {Hits = 1; Beams = [4;6;9]}
+                let currentBeamData = 
+                    {Hits = 1; 
+                     Beams = [4;6;9] |> List.map (fun p -> {PathCount = 0; Path = p})}
 
-                let expectBeamData = {Hits = 3; Beams = [4;5;7;8;10]}
+                let expectBeamData = 
+                    {Hits = 3; 
+                     Beams = [4;5;7;8;10] |> List.map (fun p -> {PathCount = 0; Path = p})}
 
                 let newBeamData = updateBeamData currentBeamData [6; 9]
                 
                 Expect.equal newBeamData expectBeamData "New beam data does not match epxectation"
 
             testCase "Given beam list and single new hit that causes duplication, only distinct beams are generated" <| fun _ ->
-                let currentBeamData = {Hits = 1; Beams = [4;6;7]}
+                let currentBeamData = 
+                    {Hits = 1; 
+                     Beams = [4;6;7] |> List.map (fun p -> {PathCount = 0; Path = p})}
 
-                let expectBeamData = {Hits = 2; Beams = [4;5;7]}
+                let expectBeamData = 
+                    {Hits = 2; Beams = [4;5;7] |> List.map (fun p -> {PathCount = 0; Path = p})}
 
                 let newBeamData = updateBeamData currentBeamData [6]
                 
                 Expect.equal newBeamData expectBeamData "New beam data does not match epxectation"
 
             testCase "Run against complete test date produces expected result" <| fun _ ->
-                let expectBeamData = {Hits = 21; Beams = [0;2;4;6;8;10;11;12;14]}
+                let expectBeamData = 
+                    {Hits = 21; 
+                     Beams = [0;2;4;6;8;10;11;12;14] |> List.map (fun p -> {PathCount = 0; Path = p})}
 
                 let p1Result = 
                     sampleData.Split(Environment.NewLine)
@@ -115,9 +128,16 @@ let tests =
 
                 Expect.equal p1Result expectBeamData "Part 1 result does not match expectation"
         ]
-
         
         testList "Part 2 tests" [
+            testCase "Simple doubling of paths tracked" <| fun _ ->
+                let currentBeamData = 
+                    {Hits = 1; 
+                     Beams = [7] |> List.map (fun p -> {PathCount = 0; Path = p})}
+
+                let newBeamData = updateBeamData currentBeamData [7]
+
+                printfn "%A" newBeamData
             
         ]
     ]
