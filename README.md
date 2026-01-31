@@ -35,3 +35,21 @@ Part 1 result is s: 6757749566978
 Real: 00:00:00.008, CPU: 00:00:00.000, GC gen0: 0, gen1: 0, gen2: 0
 Part 2 result is s: 10603075273949
 Real: 00:00:00.010, CPU: 00:00:00.015, GC gen0: 0, gen1: 0, gen2: 0
+
+## Day 7
+#### Synopsis
+
+#### Rating
+⭐⭐⭐⭐⭐
+
+#### Time to complete
+Part 1 : An hour or two. Tracking the split beam paths and matching to the '^' char in char arrays in a sinlge pass was straightforward. 
+Part 2 : 12 or so hours in total. Complete refactor to add the concpt of a 'Beam' with 'PathCount' and 'Path' was needed. Once I'd finally realised that the total paths with no gaps was the sum of the last Pascal's Triangle coefficients the single pass solution becme apparent.
+
+#### Execution time (includes data read)
+The single pass of data for both parts made this efficient and fast
+
+Part 1 result is: 1630
+Real: 00:00:00.006, CPU: 00:00:00.000, GC gen0: 0, gen1: 0, gen2: 0
+Part 2 result is: 47857642990160
+Real: 00:00:00.003, CPU: 00:00:00.015, GC gen0: 0, gen1: 0, gen2: 0

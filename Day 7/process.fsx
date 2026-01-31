@@ -6,15 +6,15 @@ let filePath = @"..\Day 7\input-data.txt"
 open AoCUtils.Utils
 open System 
 
-type Beam = {PathCount : int; Path : int}
+type Beam = {PathCount : int64; Path : int}
 type BeamData = {Hits: int; Beams: Beam list}
 
-let locateSplitters (beams : int list) (input : char array) =
+let locateSplitters (beams : Beam list) (input : char array) =
     let rec locate beams' splits =
         match beams' with
         | []    -> splits
         | h::t  -> 
-            if input[h] = '^' 
+            if input[h.Path] = '^' 
             then 
                 locate t (h::splits)
             else
@@ -26,38 +26,57 @@ let locateSplitters (beams : int list) (input : char array) =
             input 
             |> Array.tryFindIndex(fun c -> c = 'S')
         match beamIndex with
-        | Some index -> [index]
+        | Some index -> [{PathCount = 1; Path = index}]
         | None -> failwithf "Beam could not be initiated"
     | _ ->
         locate beams []
 
 let updateBeamData beamData newHits =
-    match newHits with
-    | []  -> beamData
+    match newHits, beamData.Beams with
+    | [], _ -> beamData
+    | _, [] -> // initiator beam
+        let beams = newHits |> List.map (fun bp -> {PathCount = 1; Path = bp})
+        {beamData with Beams = beams}
     | _   ->
         let newHitList = 
             newHits
-            |> List.fold (fun acc n -> (n-1)::(n+1)::acc) []
-        
+            |> List.fold (fun acc n -> 
+                let parent = 
+                  beamData.Beams 
+                  |> List.find (fun b -> b.Path = n)
+                {PathCount = parent.PathCount; Path = (n-1)}
+                  ::{PathCount = parent.PathCount; Path = (n+1)}::acc) []
+
         let newBeams =
             beamData.Beams
-            |> List.map (fun b -> b.Path)
-            |> List.filter (fun path -> not (newHits |> List.contains path))
+            |> List.filter (fun beam -> not (newHits |> List.contains beam.Path))
             |> List.insertManyAt 0 newHitList
-            |> List.distinct
-            |> List.sort
-            |> List.map (fun bp -> {PathCount = 0; Path = bp} )
-
+            |> List.sortBy (fun b -> b.Path)
+            |> List.fold (fun acc next -> 
+                    match acc with
+                    | [] -> 
+                        let ret = next::acc
+                        next::acc
+                    | h::t when h.Path = next.Path ->
+                        let ret = {h with PathCount = h.PathCount + next.PathCount} :: t
+                        ret
+                    | h::t -> 
+                        let ret = next::h::t
+                        ret
+                        ) []
+            |> List.sortBy (fun b -> b.Path)    
+        
         {beamData with Hits = beamData.Hits + newHits.Length; Beams = newBeams}
 
 
-let procP1 input =
+let process input =
     input
     |> Array.fold (fun beamData beamArray ->
-            let paths = beamData.Beams |> List.map (fun b -> b.Path)
-            let splitters = locateSplitters paths beamArray
-            
-            updateBeamData beamData splitters)
+            let splitters = 
+                locateSplitters beamData.Beams beamArray
+                |> List.map (fun b -> b.Path)
+
+            updateBeamData beamData splitters )
             {Hits = 0; Beams = []}
 
 let inputData = 
@@ -68,9 +87,10 @@ let inputData =
     |> Seq.toArray
 
 #time
-//inputData |> procP1 |> (printfn "Part 1 result is s: %A") 
+let prcRes = inputData |> process 
+prcRes |> fun res -> printfn "Part 1 result is: %d" res.Hits
 #time
 
 #time
-//part2result() |> (printfn "Part 2 result is s: %d") 
+prcRes |> fun res -> printfn "Part 2 result is: %d" (res.Beams |> List.sumBy (fun b -> b.PathCount))
 #time

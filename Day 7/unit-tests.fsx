@@ -39,15 +39,14 @@ let tests =
 
                 Expect.throws  
                     (fun _ -> locateSplitters [] input[1] |> ignore)
-                    "Expected falure due to missing beam initiator"
+                    "Expected failure due to missing beam initiator"
 
             testCase "Finds beam origin" <| fun _ ->
-                let expectedBeams = [7]
+                let expectedBeams = [{PathCount = 1; Path = 7}]
 
                 let input = 
                     testData1.Split(Environment.NewLine)
                     |> Array.map(fun line -> line.ToCharArray())
-
 
                 let actualBeams = 
                     locateSplitters [] input[0]
@@ -61,20 +60,23 @@ let tests =
                     testData1.Split(Environment.NewLine)
                     |> Array.map(fun line -> line.ToCharArray())
 
+                let currentBeams = [5; 7] |> List.map (fun p -> {PathCount = 1; Path = p })
                 let actualBeams = 
-                    locateSplitters  [5; 7] input[1]
+                    locateSplitters  currentBeams input[1]
 
                 Expect.equal actualBeams expectedBeams "Actual beams does not match expected"
 
             testCase "Row with a hit splitter returns hit locations" <| fun _ ->
-                let expectedBeams = [7]
+                let expectedBeams = [{PathCount = 0; Path = 7}]
 
                 let input = 
                     testData1.Split(Environment.NewLine)
                     |> Array.map(fun line -> line.ToCharArray())
 
                 let actualBeams = 
-                    locateSplitters  [5; 7] input[2]
+                    locateSplitters  
+                        ([5; 7] |> List.map (fun p -> {PathCount = 0; Path = p}))
+                        input[2]
 
                 Expect.equal actualBeams expectedBeams "Actual beams does not match expected"
 
@@ -116,29 +118,68 @@ let tests =
                 
                 Expect.equal newBeamData expectBeamData "New beam data does not match epxectation"
 
-            testCase "Run against complete test date produces expected result" <| fun _ ->
+            testCase "First row Beam initiation returns a Beam" <| fun _ ->
                 let expectBeamData = 
-                    {Hits = 21; 
-                     Beams = [0;2;4;6;8;10;11;12;14] |> List.map (fun p -> {PathCount = 0; Path = p})}
+                    {Hits = 0; 
+                     Beams = [7] |> List.map (fun p -> {PathCount = 1; Path = p})}
+
+                let p1Result = 
+                    sampleData.Split(Environment.NewLine)
+                    |> Array.take 1
+                    |> Array.map(fun line -> line.ToCharArray())
+                    |> procP1
+
+                Expect.equal p1Result expectBeamData "Part 1 first line result does not match expectation"
+
+            testCase "Run against complete test date produces expected result" <| fun _ ->
+                let expectHits = 21
 
                 let p1Result = 
                     sampleData.Split(Environment.NewLine)
                     |> Array.map(fun line -> line.ToCharArray())
                     |> procP1
 
-                Expect.equal p1Result expectBeamData "Part 1 result does not match expectation"
+                Expect.equal p1Result.Hits expectHits "Part 1 result does not match expectation"
         ]
         
         testList "Part 2 tests" [
-            testCase "Simple doubling of paths tracked" <| fun _ ->
+            testCase "First splitter is path count 1 " <| fun _ ->
                 let currentBeamData = 
+                    {Hits = 0; 
+                     Beams = [7] |> List.map (fun p -> {PathCount = 1; Path = p})}
+
+                let expected= 
                     {Hits = 1; 
-                     Beams = [7] |> List.map (fun p -> {PathCount = 0; Path = p})}
+                     Beams = [{PathCount = 1; Path = 6}; {PathCount = 1; Path = 8}]}
 
                 let newBeamData = updateBeamData currentBeamData [7]
 
-                printfn "%A" newBeamData
-            
+                Expect.equal newBeamData expected (sprintf "Expectation not matched. Expected %An got %A" expected newBeamData)
+
+            testCase "Multi parents sum up" <| fun _ ->
+                let currentBeamData = 
+                    {Hits = 0; 
+                     Beams = [7; 9] |> List.map (fun p -> {PathCount = 1; Path = p})}
+
+                let expected= 
+                    {Hits = 2; 
+                     Beams = [{PathCount = 1; Path = 6}; {PathCount = 2; Path = 8}; {PathCount = 1; Path = 10}]}
+
+                let newBeamData = updateBeamData currentBeamData [7;9]
+
+                Expect.equal newBeamData expected (sprintf "Expectation not matched. Expected %An got %A" expected newBeamData)
+
+            testCase "Run against complete test date produces expected result" <| fun _ ->
+                let expectPaths = 40
+
+                let p1Result = 
+                    sampleData.Split(Environment.NewLine)
+                    |> Array.map(fun line -> line.ToCharArray())
+                    |> procP1
+                    |> fun bdat -> bdat.Beams |> List.sumBy (fun b -> b.PathCount)
+
+
+                Expect.equal p1Result expectPaths "Part 2 result does not match expectation"
         ]
     ]
 
