@@ -127,7 +127,7 @@ let tests =
                     sampleData.Split(Environment.NewLine)
                     |> Array.take 1
                     |> Array.map(fun line -> line.ToCharArray())
-                    |> procP1
+                    |> processData
 
                 Expect.equal p1Result expectBeamData "Part 1 first line result does not match expectation"
 
@@ -137,7 +137,7 @@ let tests =
                 let p1Result = 
                     sampleData.Split(Environment.NewLine)
                     |> Array.map(fun line -> line.ToCharArray())
-                    |> procP1
+                    |> processData
 
                 Expect.equal p1Result.Hits expectHits "Part 1 result does not match expectation"
         ]
@@ -175,7 +175,7 @@ let tests =
                 let p1Result = 
                     sampleData.Split(Environment.NewLine)
                     |> Array.map(fun line -> line.ToCharArray())
-                    |> procP1
+                    |> processData
                     |> fun bdat -> bdat.Beams |> List.sumBy (fun b -> b.PathCount)
 
 

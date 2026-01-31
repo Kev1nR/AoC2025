@@ -69,7 +69,7 @@ let updateBeamData beamData newHits =
         {beamData with Hits = beamData.Hits + newHits.Length; Beams = newBeams}
 
 
-let process input =
+let processData input =
     input
     |> Array.fold (fun beamData beamArray ->
             let splitters = 
@@ -87,7 +87,7 @@ let inputData =
     |> Seq.toArray
 
 #time
-let prcRes = inputData |> process 
+let prcRes = inputData |> processData 
 prcRes |> fun res -> printfn "Part 1 result is: %d" res.Hits
 #time
 
