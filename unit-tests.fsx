@@ -148,6 +148,27 @@ let tests =
                     |]
 
                 Expect.throws (fun _ -> transposeMatrix matrix |> ignore) "Transposing matrix with unequal rows should throw error"
+    
+            ftestCase "Build upper triangle matrix from 1D array" <| fun _ ->
+                let inputArray = [|'A' .. 'J'|]
+
+                let expected = 
+                    [|
+                        [|'A' .. 'J'|]
+                        [|'B' .. 'J'|]
+                        [|'C' .. 'J'|]
+                        [|'D' .. 'J'|]
+                        [|'E' .. 'J'|]
+                        [|'F' .. 'J'|]
+                        [|'G' .. 'J'|]
+                        [|'H' .. 'J'|]
+                        [|'I' .. 'J'|]
+                        [|'J'|]
+                    |]
+
+                let result = inputArray |> toUpperTriangle
+
+                Expect.equal result expected "Result does not match expected"    
         ]        
     ] 
 

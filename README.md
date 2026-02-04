@@ -53,3 +53,22 @@ Part 1 result is: 1630
 Real: 00:00:00.006, CPU: 00:00:00.000, GC gen0: 0, gen1: 0, gen2: 0
 Part 2 result is: 47857642990160
 Real: 00:00:00.003, CPU: 00:00:00.015, GC gen0: 0, gen1: 0, gen2: 0
+
+## Day 8
+#### Synopsis
+
+#### Rating
+⭐⭐⭐⭐
+
+#### Time to complete
+Part 1 : Several hours. Started with the idea of creating a jagged array of arrays and later went with an outer/inner loop approach - simpler, probably faster.
+The `buildCircuits` function seems messier than it need be - might revisit in part 2.
+I created `System.Numerics.Vector3` objects and used that class's `Distance` function rather than write my own. That was because I wanted to use integer inputs but in the end the `Vector3` class takes floats anyway - will revisit in part 2 to see if performance is better with a homegrown solution.
+
+#### Execution time (includes data read)
+The single pass of data for both parts made this efficient and fast
+
+Part 1 result is: 1630
+Real: 00:00:00.006, CPU: 00:00:00.000, GC gen0: 0, gen1: 0, gen2: 0
+Part 2 result is: 47857642990160
+Real: 00:00:00.003, CPU: 00:00:00.015, GC gen0: 0, gen1: 0, gen2: 0

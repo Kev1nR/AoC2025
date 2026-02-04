@@ -2,6 +2,7 @@ module Utils =
 
     open System.Collections.Generic
     open System.IO
+    open System.Numerics
 
     module ReadData =
         let readLines (filePath:string) = 
@@ -92,6 +93,15 @@ module Utils =
                 |]
         |] 
 
+    let toUpperTriangle (input : 'a array) =
+        [|
+            for row in 0 .. input.Length - 1 do
+                [|
+                    for col in row .. input.Length - 1 do
+                        input[col]
+                |]
+        |]
+
     let splitWhen splitValue input =  
         let rec proc' vals collectVals acc =
             match vals with
@@ -106,4 +116,5 @@ module Utils =
                     proc' vs (v::collectVals) acc              
 
         proc' (input |> Array.toList) [] []         
+
         
