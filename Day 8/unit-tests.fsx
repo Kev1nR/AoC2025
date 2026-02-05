@@ -82,6 +82,24 @@ let tests =
         ]
         
         testList "Part 2 tests" [
+            testCase "Detect first point at which all junction boxes are connected into one circuit" <| fun _ ->
+                let inputData = 
+                    sampleData.Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries)
+                    |> Array.map (fun triplet ->
+                        triplet.Split(','))
+
+                let expected = 25272
+
+                let distances =
+                    inputData 
+                    |> sortedDistances 
+                    
+                let actual = 
+                    distances
+                    |> proc2 20
+                    
+                Expect.equal actual actual (sprintf "Expected %A but got %A" expected actual)
+                
         ]
     ]
 

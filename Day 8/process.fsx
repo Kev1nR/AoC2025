@@ -27,63 +27,67 @@ let sortedDistances input =
     |> Seq.sortBy (fun ds -> ds.Distance)
     |> Seq.toArray
 
-let buildCircuits input =
-    let rec build distances (circuits : Circuit list) =
-        match distances with
-        | [] -> circuits
-        | h::t -> 
-            let found =
-                circuits
-                |> List.filter (fun (c : Circuit) -> 
-                    c |> List.exists (fun c' -> c' = h.FromIndex || c' = h.ToIndex))
+let buildCircuits junctionBoxCount input =
+    let rec build  distances lastIndex (circuits : Circuit list) =
+        if circuits |> List.length = 1 && circuits[0] |> List.length = junctionBoxCount 
+        then
+            lastIndex, circuits
+        else
+            match distances with
+            | [] -> lastIndex, circuits
+            | h::t -> 
+                let found =
+                    circuits
+                    |> List.filter (fun (c : Circuit) -> 
+                        c |> List.exists (fun c' -> c' = h.FromIndex || c' = h.ToIndex))
 
-            match found with
-            | [] -> 
-                let newCircuit = [h.FromIndex; h.ToIndex] |> List.sort
-                build t (newCircuit::circuits)
-            | f::[] -> 
-                // Found in one circuit so append it                
-                let newCircuit = 
-                    h.FromIndex::h.ToIndex::f |> List.distinct |> List.sort
-
-                let foundIndex = circuits |> List.findIndex (fun c -> c = f)
-
-                let newCircuits =
-                    circuits 
-                    |> List.removeAt foundIndex
-                    |> List.insertAt 0 newCircuit
+                match found with
+                | [] -> 
+                    let newCircuit = [h.FromIndex; h.ToIndex]
+                    build t (h.FromIndex, h.ToIndex) (newCircuit::circuits)
+                | f::[] -> 
+                    // Found in one circuit so append it                
+                    let newCircuit = h.FromIndex::h.ToIndex::f |> List.distinct |> List.sort
                     
-                build t newCircuits
-            | f::g::[] ->
-                // Found in two circuits so merge them 
-                let newCircuit = 
-                    found |> List.concat |> List.distinct |> List.sort
+                    let foundIndex = circuits |> List.findIndex (fun c -> c = f)
 
-                let foundIndexF = circuits |> List.findIndex (fun c -> c = f)
+                    let newCircuits =
+                        circuits 
+                        |> List.removeAt foundIndex
+                        |> List.insertAt 0 newCircuit
+                        
+                    build t (h.FromIndex, h.ToIndex) newCircuits
+                | f::g::[] ->
+                    // Found in two circuits so merge them 
+                    let newCircuit = 
+                        found |> List.concat |> List.distinct |> List.sort
+
+                    let foundIndexF = circuits |> List.findIndex (fun c -> c = f)
+                    
+                    let newCircuits =
+                        circuits 
+                        |> List.removeAt foundIndexF
+                    
+                    let foundIndexG = newCircuits |> List.findIndex (fun c -> c = g)
+                                        
+                    let newCircuits =
+                        newCircuits 
+                        |> List.removeAt foundIndexG
+                        |> List.insertAt 0 newCircuit
                 
-                let newCircuits =
-                    circuits 
-                    |> List.removeAt foundIndexF
-                
-                let foundIndexG = newCircuits |> List.findIndex (fun c -> c = g)
-                                    
-                let newCircuits =
-                    newCircuits 
-                    |> List.removeAt foundIndexG
-                    |> List.insertAt 0 newCircuit
-            
-                build t newCircuits    
-                
-    build (input |> Array.toList) []
+                    build t (h.FromIndex, h.ToIndex) newCircuits    
+                    
+    build (input |> Array.toList) (0,0) []
 
 let proc1 input =
     input
-    |> buildCircuits
-    |> List.sortByDescending (fun c -> c |> List.length)
+    |> buildCircuits 1000
+    |> fun c -> 
+        (snd c) |> List.sortByDescending (fun c -> c |> List.length)
     |> List.take 3
     |> List.map (fun item -> item.Length)
     |> List.fold (*) 1
-
+    
 let inputData = 
     filePath
     |> ReadData.readLines
@@ -91,6 +95,13 @@ let inputData =
     |> Array.map (fun triplet ->
         triplet.Split(','))
     
+let proc2 junctionBoxCount  input =
+    input
+    |> buildCircuits junctionBoxCount
+    |> fst
+    |> fun (i, j) -> 
+        (int64 (inputData[i][0])) * (int64 (inputData[j][0]))
+
 #time
 inputData 
 |> sortedDistances 
@@ -98,3 +109,10 @@ inputData
 |> proc1
 |> printfn "Part 1 result: %d"
 #time 
+
+#time
+inputData 
+|> sortedDistances 
+|> proc2 1000
+|> printfn "Part 2 result: %d"
+#time
