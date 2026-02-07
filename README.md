@@ -72,3 +72,18 @@ Part 1 result: 57970
 Real: 00:00:00.259, CPU: 00:00:00.359, GC gen0: 1, gen1: 1, gen2: 1
 Part 2 result: 8520040659
 Real: 00:00:00.655, CPU: 00:00:01.328, GC gen0: 16, gen1: 3, gen2: 2
+
+
+## Day 9
+#### Synopsis
+
+#### Rating
+⭐⭐⭐⭐⭐
+
+#### Time to complete
+Part 1 : 2 hours. A fairly minor adaptation of the jagged array scenario of day 8. I pulled out a `pairwiseFold` function into `AoCUtils` to calculate the areas in a single pass.
+Observation: The original implementation of `pairwiseFold` accepted a sequence but the perfromance was very poor. I modifed to accept an Array and performance was order of magnitude faster. Obvious in hindsight as the `Seq` implementation was repeatedly scanning for the required index Cf the array direct indexing.
+
+#### Execution time (includes data read)
+Part 1 result: ((83937L, 84866L), (12865L, 18149L), **4741848414L**)
+Real: 00:00:00.031, CPU: 00:00:00.031, GC gen0: 1, gen1: 0, gen2: 0

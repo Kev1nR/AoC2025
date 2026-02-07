@@ -102,6 +102,18 @@ module Utils =
                 |]
         |]
 
+    let pairwiseFold (fold : 'a -> 'b -> 'c) input =
+        let inputLen = input |> Array.length
+        seq {
+            for i in 0 .. inputLen - 1 do
+                for j in (i + 1) .. inputLen - 1 do
+                    let si = input[i]
+                    let sj = input[j]
+
+                    fold si sj
+        }    
+
+    
     let splitWhen splitValue input =  
         let rec proc' vals collectVals acc =
             match vals with
