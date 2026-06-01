@@ -102,6 +102,14 @@ module Utils =
                 |]
         |]
 
+
+// /// and applies <paramref name="fold"> to each cross product element.
+//     /// </summary> 
+//     /// <param name="input">The input collection.</param>
+//     /// <param name="fold">The function be applied.</param>
+    
+
+    /// Creates the pairwise Cartesian product of every element of
     let pairwiseFold (fold : 'a -> 'b -> 'c) input =
         let inputLen = input |> Array.length
         seq {
