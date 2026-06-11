@@ -10,6 +10,9 @@ type Orientation = Horizontal | Vertical
 
 type Edge = {Orientation: Orientation; Base: int64; Max: int64; Min: int64}
 
+// A Rectangle defined by its corners
+type Rect = {TopLeft: int64 * int64; TopRight: int64 * int64; BottomLeft: int64 * int64; BottomRight: int64 * int64}
+
 let inputData = 
     filePath
     |> ReadData.readLines
@@ -38,7 +41,7 @@ let getRectCorners (rectCoords : (int64 * int64) * (int64 * int64)) =
     let bottomLeft = Math.Min (r1, r2), Math.Max(c1, c2)
     let bottomRight = Math.Max (r1, r2), Math.Max(c1, c2)
 
-    topLeft, topRight, bottomLeft, bottomRight
+    {TopLeft=topLeft; TopRight=topRight; BottomLeft=bottomLeft; BottomRight=bottomRight}
 
 let getHorizontalEdges coords =
     coords
@@ -68,7 +71,6 @@ let getVerticalEdges coords =
     coords
     |> Array.sortBy (fun (x, y) -> x)
     |> Array.fold (fun (nextEdge, edgecoords) (x, y) -> 
-        printfn "Next edge: %A" nextEdge
         match nextEdge with
         | None -> 
             let newEdgeCoord = {Orientation = Vertical; Base = x; Max = y; Min = y}
@@ -94,18 +96,50 @@ let pointInPolygon edges (px : Int64, py : Int64) =
         edges
         |> Seq.filter (fun edge -> (float edge.Base) > px' && (float edge.Max) > py' && (float edge.Min) < py')
 
-    printfn "Crossings = %A" crossings
+    // printfn "Crossings = %A" crossings
 
     (crossings |> Seq.length) % 2 = 1
 
+let detectVerticalCrossing v_edges rect =
+    let crossingEdges =
+        v_edges
+        |> Seq.filter (fun edge ->
+    
+            let baseResult = edge.Base > (fst rect.TopLeft) && edge.Base < (fst rect.TopRight)
+            let topCrossing = (float edge.Min < (float (snd rect.TopLeft) + 0.5) && float edge.Max > (float (snd rect.TopLeft) + 0.5))
+            let bottomCrossing = (float edge.Min < (float (snd rect.BottomLeft) - 0.5) && float edge.Max > (float (snd rect.BottomLeft) - 0.5))
+           
+            baseResult && (topCrossing || bottomCrossing) 
+            )
+    
+    crossingEdges
+    |> Seq.isEmpty
+    |> not
+    
+let detectHorizontalCrossing h_edges rect =
+    let crossingEdges =
+        h_edges
+        |> Seq.filter (fun edge ->
+            
+            let baseResult = edge.Base > (snd rect.TopLeft) && edge.Base < (snd rect.TopRight)
+            let leftCrossing = (float edge.Min < (float (fst rect.TopLeft) + 0.5) && float edge.Max > (float (fst rect.TopLeft) + 0.5))
+            let rightCrossing = (float edge.Min < (float (fst rect.TopRight) - 0.5) && float edge.Max > (float (fst rect.TopRight) - 0.5))
+           
+            baseResult && (leftCrossing || rightCrossing) 
+            )
+    
+    crossingEdges
+    |> Seq.isEmpty
+    |> not
+    
 let rectInPolygon v_edges h_edges (rect_c1, rect_c2) = 
-    let topL, _, _, _ = getRectCorners (rect_c1, rect_c2)
+    let rect  = getRectCorners (rect_c1, rect_c2)
     
     let isInPoly =
-        pointInPolygon v_edges topL
+        pointInPolygon v_edges rect.TopLeft
     
-    let rectIsCrossedVert = false
-    let rectIsCrossedHoriz  = false
+    let rectIsCrossedVert = detectVerticalCrossing v_edges rect
+    let rectIsCrossedHoriz  = detectHorizontalCrossing h_edges rect
 
     isInPoly && (not rectIsCrossedVert) && (not rectIsCrossedHoriz)
 

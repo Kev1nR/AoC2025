@@ -53,6 +53,10 @@ let tests =
 
                 let res = 
                     pairwiseFold calcAreas inputData
+                    |> Seq.iter (printfn "%A")
+
+                let res = 
+                    pairwiseFold calcAreas inputData
                     |> Seq.maxBy (fun (_,_, A) -> A)
                     |> fun (_, _, A) -> A
                
@@ -61,6 +65,43 @@ let tests =
         ]
         
         testList "Part 2 tests" [
+            let inpolygon_tests = 
+                [
+                    ((7L, 1L), (2L, 3L), false)
+                    ((2L, 3L), (9L, 5L), true)
+                    ((7L, 3L), (11L, 7L), false)
+                    ((2L, 3L), (9L, 7L), true)
+                ]
+            
+            ftestList "Rectangle in boundary tests" [
+                for (rect_c1, rect_c2, expected) in inpolygon_tests do
+                    testCase $"""Rectangle {rect_c1}, {rect_c2} should {if expected then "be" else "not be"} in boundary""" <| fun _ ->
+                        let inputData = 
+                            sampleData.Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries)
+                            |> Seq.map (fun s -> 
+                                s.Split(','))
+                            |> Seq.map (fun elem  -> 
+                                match elem with
+                                | [|a; b|] -> (int64 a, int64 b)
+                                | _ -> failwith "Unexpected corrdinates") 
+                            |> Seq.toArray
+
+                        let verticalEdges = 
+                            getVerticalEdges inputData
+                            |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
+
+                        let horizontalEdges = 
+                            getHorizontalEdges inputData
+                            |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
+
+                        //printfn "Vertical edges =============\n%A" verticalEdges
+
+                        let actual = rectInPolygon verticalEdges horizontalEdges (rect_c1, rect_c2)   
+
+                        Expect.equal actual expected $"""Point {if expected then "is" else "is not"} expected to be in polygon"""
+
+            ]
+
             testCase "Generate a list of vertical edges for the bounding polygon" <| fun _ ->
                 let inputData = 
                     sampleData.Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries)
@@ -118,100 +159,7 @@ let tests =
                     |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
 
                 Expect.sequenceEqual horizontalEdges expectedEdges "Expected horizontal edges to be the same"
-
-            ftestCase "Cast a ray from 2,1 to right is not in boundary" <| fun _ ->
-                let inputData = 
-                    sampleData.Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries)
-                    |> Seq.map (fun s -> 
-                        s.Split(','))
-                    |> Seq.map (fun elem  -> 
-                        match elem with
-                        | [|a; b|] -> (int64 a, int64 b)
-                        | _ -> failwith "Unexpected corrdinates") 
-                    |> Seq.toArray
-
-                let verticalEdges = 
-                    getVerticalEdges inputData
-                    |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
-
-                let horizontalEdges = 
-                    getHorizontalEdges inputData
-                    |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
-
-                let actual = rectInPolygon verticalEdges horizontalEdges ((7L, 1L), (2L, 3L))   
-
-                Expect.isFalse actual  "Point not expected to be in polygon"
-
-            ftestCase "Cast a ray from 2,3 to right is in boundary" <| fun _ ->
-                let inputData = 
-                    sampleData.Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries)
-                    |> Seq.map (fun s -> 
-                        s.Split(','))
-                    |> Seq.map (fun elem  -> 
-                        match elem with
-                        | [|a; b|] -> (int64 a, int64 b)
-                        | _ -> failwith "Unexpected corrdinates") 
-                    |> Seq.toArray
-
-                let verticalEdges = 
-                    getVerticalEdges inputData
-                    |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
-
-                let horizontalEdges = 
-                    getHorizontalEdges inputData
-                    |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
-
-                let actual = rectInPolygon verticalEdges horizontalEdges ((2L, 3L), (9L, 5L))   
-
-                Expect.isTrue actual  "Point expected to be in polygon"
-
-            ftestCase "Cast a ray from 7,3 to right is in boundary although the rectangle is not" <| fun _ ->
-                let inputData = 
-                    sampleData.Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries)
-                    |> Seq.map (fun s -> 
-                        s.Split(','))
-                    |> Seq.map (fun elem  -> 
-                        match elem with
-                        | [|a; b|] -> (int64 a, int64 b)
-                        | _ -> failwith "Unexpected corrdinates") 
-                    |> Seq.toArray
-
-                let verticalEdges = 
-                    getVerticalEdges inputData
-                    |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
-
-                let horizontalEdges = 
-                    getHorizontalEdges inputData
-                    |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
-
-                // let actual = pointInPolygon verticalEdges (2L, 1L)   
-                let actual = rectInPolygon verticalEdges horizontalEdges ((2L, 5L), (11L, 7L))   
-
-                Expect.isFalse actual  "Point not expected to be in polygon"
-
-            ftestCase "Cast a ray from 2,3 to right is in boundary although the rectangle is not" <| fun _ ->
-                let inputData = 
-                    sampleData.Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries)
-                    |> Seq.map (fun s -> 
-                        s.Split(','))
-                    |> Seq.map (fun elem  -> 
-                        match elem with
-                        | [|a; b|] -> (int64 a, int64 b)
-                        | _ -> failwith "Unexpected corrdinates") 
-                    |> Seq.toArray
-
-                let verticalEdges = 
-                    getVerticalEdges inputData
-                    |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
-
-                let horizontalEdges = 
-                    getHorizontalEdges inputData
-                    |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
-
-                let actual = rectInPolygon verticalEdges horizontalEdges ((2L, 3L), (9L, 5L))   
-
-                Expect.isTrue actual  "Point not expected to be in polygon"
-
+            
         ]
     ]
 
