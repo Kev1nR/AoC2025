@@ -26,7 +26,10 @@ let tests =
                     sampleData.Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries)
                     |> Seq.map (fun s -> 
                         s.Split(','))
-                    |> Seq.map (fun [|a; b|]  -> (int64 a, int64 b)) 
+                    |> Seq.map (fun elem  -> 
+                        match elem with
+                        | [|a; b|] -> (int64 a, int64 b)
+                        | _ -> failwith "Unexpected corrdinates") 
                     |> Seq.toArray
 
                 let fn a b = 
@@ -48,7 +51,10 @@ let tests =
                     sampleData.Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries)
                     |> Seq.map (fun s -> 
                         s.Split(','))
-                    |> Seq.map (fun [|a; b|]  -> (int64 a, int64 b)) 
+                    |> Seq.map (fun elem  -> 
+                        match elem with
+                        | [|a; b|] -> (int64 a, int64 b)
+                        | _ -> failwith "Unexpected corrdinates") 
                     |> Seq.toArray
 
                 let res = 
@@ -68,9 +74,23 @@ let tests =
             let inpolygon_tests = 
                 [
                     ((7L, 1L), (2L, 3L), false)
-                    ((2L, 3L), (9L, 5L), true)
-                    ((7L, 3L), (11L, 7L), false)
-                    ((2L, 3L), (9L, 7L), true)
+                    ((11L, 1L), (9L, 7L), true)              
+                    ((11L, 1L), (11L, 7L), false)              
+                    ((2L, 3L), (7L, 3L), false)                
+                    ((2L, 3L), (2L, 5L), false)                
+                    ((2L, 3L), (9L, 5L), true)               
+                    ((2L, 3L), (9L, 7L), false)               
+                    ((2L, 3L), (11L, 7L), false)              
+                    ((7L, 3L), (2L, 5L), true)               
+                    ((7L, 3L), (9L, 5L), true)                
+                    ((7L, 3L), (9L, 7L), false)               
+                    ((7L, 3L), (11L, 7L), false)              
+                    ((2L, 5L), (9L, 5L), false)                
+                    ((2L, 5L), (9L, 7L), false)               
+                    ((2L, 5L), (11L, 7L), false)              
+                    ((9L, 5L), (9L, 7L), false)                
+                    ((9L, 5L), (11L, 7L), true)               
+                    ((9L, 7L), (11L, 7L), false)
                 ]
             
             ftestList "Rectangle in boundary tests" [
@@ -101,6 +121,38 @@ let tests =
                         Expect.equal actual expected $"""Point {if expected then "is" else "is not"} expected to be in polygon"""
 
             ]
+
+            ftestCase "Detect a horizontal crossing for (7,3), (9,7)" <| fun _ ->
+                let horizontalEdges = 
+                    [|
+                        {
+                            Orientation = Horizontal
+                            Base = 5
+                            Max = 9
+                            Min = 2
+                        }
+                    |]
+                    
+                let rect  = getRectCorners ((7,3), (9,7))
+                let actual = detectHorizontalCrossing horizontalEdges rect
+
+                Expect.isTrue actual "Shoud have detected a horizontal crossing"
+
+            ftestCase "Detect a horizontal crossing for (2,3), (9,7)" <| fun _ ->
+                let horizontalEdges = 
+                    [|
+                        {
+                            Orientation = Horizontal
+                            Base = 5
+                            Max = 9
+                            Min = 2
+                        }
+                    |]
+                    
+                let rect  = getRectCorners ((2,3), (9,7))
+                let actual = detectHorizontalCrossing horizontalEdges rect
+
+                Expect.isTrue actual "Shoud have detected a horizontal crossing"
 
             testCase "Generate a list of vertical edges for the bounding polygon" <| fun _ ->
                 let inputData = 

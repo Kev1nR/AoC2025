@@ -94,7 +94,8 @@ let pointInPolygon edges (px : Int64, py : Int64) =
 
     let crossings = 
         edges
-        |> Seq.filter (fun edge -> (float edge.Base) > px' && (float edge.Max) > py' && (float edge.Min) < py')
+        |> Seq.filter (fun edge -> 
+            (float edge.Base) > px' && (float edge.Max) > py' && (float edge.Min) < py')
 
     // printfn "Crossings = %A" crossings
 
@@ -121,10 +122,12 @@ let detectHorizontalCrossing h_edges rect =
         h_edges
         |> Seq.filter (fun edge ->
             
-            let baseResult = edge.Base > (snd rect.TopLeft) && edge.Base < (snd rect.TopRight)
+            let baseResult = edge.Base > (snd rect.TopLeft) && edge.Base < (snd rect.BottomRight)
             let leftCrossing = (float edge.Min < (float (fst rect.TopLeft) + 0.5) && float edge.Max > (float (fst rect.TopLeft) + 0.5))
             let rightCrossing = (float edge.Min < (float (fst rect.TopRight) - 0.5) && float edge.Max > (float (fst rect.TopRight) - 0.5))
            
+            printfn "Edge: %A \n" edge           
+            printfn "Base: %A \nLeft: %A\n Right: %A" baseResult leftCrossing rightCrossing           
             baseResult && (leftCrossing || rightCrossing) 
             )
     
@@ -135,14 +138,21 @@ let detectHorizontalCrossing h_edges rect =
 let rectInPolygon v_edges h_edges (rect_c1, rect_c2) = 
     let rect  = getRectCorners (rect_c1, rect_c2)
     
-    let isInPoly =
-        pointInPolygon v_edges rect.TopLeft
+    let isLine = 
+        fst rect.TopLeft = fst rect.TopRight
+        || 
+        snd rect.TopLeft = snd rect.BottomLeft
     
-    let rectIsCrossedVert = detectVerticalCrossing v_edges rect
-    let rectIsCrossedHoriz  = detectHorizontalCrossing h_edges rect
+    match isLine with
+    | false ->
+        let isInPoly =
+            pointInPolygon v_edges rect.TopLeft
+        
+        let rectIsCrossedVert = detectVerticalCrossing v_edges rect
+        let rectIsCrossedHoriz  = detectHorizontalCrossing h_edges rect
 
-    isInPoly && (not rectIsCrossedVert) && (not rectIsCrossedHoriz)
-
+        isInPoly && (not rectIsCrossedVert) && (not rectIsCrossedHoriz)
+    | true -> false 
 
 #time
 part1()
