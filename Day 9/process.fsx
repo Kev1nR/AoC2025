@@ -25,7 +25,7 @@ let calcAreas a b =
     let a1, a2 = a
     let b1, b2 = b
     
-    (a, b, (Int64.Abs(b1 - a1) + 1L) * (Int64.Abs(b2 - a2) + 1L))
+    (a, b, (Int64.Abs(b1 - a1)+1L) * (Int64.Abs(b2 - a2)+1L))
 
 let part1 () = 
     inputData 
@@ -96,9 +96,7 @@ let pointInPolygon edges (px : Int64, py : Int64) =
         edges
         |> Seq.filter (fun edge -> 
             (float edge.Base) > px' && (float edge.Max) > py' && (float edge.Min) < py')
-
-    // printfn "Crossings = %A" crossings
-
+    
     (crossings |> Seq.length) % 2 = 1
 
 let detectVerticalCrossing v_edges rect =
@@ -126,8 +124,6 @@ let detectHorizontalCrossing h_edges rect =
             let leftCrossing = (float edge.Min < (float (fst rect.TopLeft) + 0.5) && float edge.Max > (float (fst rect.TopLeft) + 0.5))
             let rightCrossing = (float edge.Min < (float (fst rect.TopRight) - 0.5) && float edge.Max > (float (fst rect.TopRight) - 0.5))
            
-            printfn "Edge: %A \n" edge           
-            printfn "Base: %A \nLeft: %A\n Right: %A" baseResult leftCrossing rightCrossing           
             baseResult && (leftCrossing || rightCrossing) 
             )
     
@@ -150,13 +146,51 @@ let rectInPolygon v_edges h_edges (rect_c1, rect_c2) =
         
         let rectIsCrossedVert = detectVerticalCrossing v_edges rect
         let rectIsCrossedHoriz  = detectHorizontalCrossing h_edges rect
-
+        
         isInPoly && (not rectIsCrossedVert) && (not rectIsCrossedHoriz)
     | true -> false 
+
+let rec findMaxArea h_edges v_edges calcedAreas maxArea  =
+    let _, _, cur_max_area = maxArea 
+    
+    match calcedAreas with
+    | [] -> maxArea
+    | h::t ->
+        let rect_c1, rect_c2, next_area = h
+        let nextMaxArea = next_area > cur_max_area
+        
+        if nextMaxArea then
+            let isValid = rectInPolygon v_edges h_edges (rect_c1, rect_c2)
+
+            if isValid then
+                findMaxArea h_edges v_edges t h
+            else      
+                findMaxArea h_edges v_edges t maxArea
+        else
+            findMaxArea h_edges v_edges t maxArea
+
+let part2 inputData_a = 
+    let v_edges = 
+        getVerticalEdges inputData_a
+        |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
+    
+    let h_edges = 
+        getHorizontalEdges inputData_a
+        |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
+
+    let areas =
+        inputData_a
+        |> pairwiseFold calcAreas
+        |> Seq.toList
+    
+    let result = findMaxArea h_edges v_edges areas areas[0]
+
+    result
 
 #time
 part1()
 #time 
 
 #time
+inputData |> part2 |> printfn "Part 2 result: %A"
 #time

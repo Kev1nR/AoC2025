@@ -59,10 +59,6 @@ let tests =
 
                 let res = 
                     pairwiseFold calcAreas inputData
-                    |> Seq.iter (printfn "%A")
-
-                let res = 
-                    pairwiseFold calcAreas inputData
                     |> Seq.maxBy (fun (_,_, A) -> A)
                     |> fun (_, _, A) -> A
                
@@ -93,7 +89,7 @@ let tests =
                     ((9L, 7L), (11L, 7L), false)
                 ]
             
-            ftestList "Rectangle in boundary tests" [
+            testList "Rectangle in boundary tests" [
                 for (rect_c1, rect_c2, expected) in inpolygon_tests do
                     testCase $"""Rectangle {rect_c1}, {rect_c2} should {if expected then "be" else "not be"} in boundary""" <| fun _ ->
                         let inputData = 
@@ -114,15 +110,13 @@ let tests =
                             getHorizontalEdges inputData
                             |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
 
-                        //printfn "Vertical edges =============\n%A" verticalEdges
-
                         let actual = rectInPolygon verticalEdges horizontalEdges (rect_c1, rect_c2)   
 
                         Expect.equal actual expected $"""Point {if expected then "is" else "is not"} expected to be in polygon"""
 
             ]
 
-            ftestCase "Detect a horizontal crossing for (7,3), (9,7)" <| fun _ ->
+            testCase "Detect a horizontal crossing for (7,3), (9,7)" <| fun _ ->
                 let horizontalEdges = 
                     [|
                         {
@@ -138,7 +132,7 @@ let tests =
 
                 Expect.isTrue actual "Shoud have detected a horizontal crossing"
 
-            ftestCase "Detect a horizontal crossing for (2,3), (9,7)" <| fun _ ->
+            testCase "Detect a horizontal crossing for (2,3), (9,7)" <| fun _ ->
                 let horizontalEdges = 
                     [|
                         {
@@ -174,9 +168,6 @@ let tests =
                     |]
                     |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
 
-                printfn "Expected edges:\n"
-                expectedEdges |> Array.iter (printfn "\t%A")
-
                 let verticalEdges = 
                     getVerticalEdges inputData
                     |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
@@ -203,15 +194,28 @@ let tests =
                     |]
                     |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
 
-                printfn "Expected edges:\n"
-                expectedEdges |> Array.iter (printfn "\t%A")
-
                 let horizontalEdges = 
                     getHorizontalEdges inputData
                     |> Array.sortBy (fun e -> e.Base, e.Max, e.Min)
 
                 Expect.sequenceEqual horizontalEdges expectedEdges "Expected horizontal edges to be the same"
             
+            testCase "Part 2 gives correct result" <| fun _ ->
+                let inputData = 
+                    sampleData.Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries)
+                    |> Seq.map (fun s -> 
+                        s.Split(','))
+                    |> Seq.map (fun elem  -> 
+                        match elem with
+                        | [|a; b|] -> (int64 a, int64 b)
+                        | _ -> failwith "Unexpected corrdinates") 
+                    |> Seq.toArray
+
+                let expected = 24L
+
+                let _, _, actual = part2 inputData
+
+                Expect.equal actual expected "Incorrect result"
         ]
     ]
 
