@@ -43,6 +43,9 @@ let getRectCorners (rectCoords : (int64 * int64) * (int64 * int64)) =
 
     {TopLeft=topLeft; TopRight=topRight; BottomLeft=bottomLeft; BottomRight=bottomRight}
 
+/// getHorizontalEdges <param>coords</param>
+/// Takes an array of coords. Returns an array of Horizontal edges
+/// <return>Edge array</return>
 let getHorizontalEdges coords =
     coords
     |> Array.sortBy (fun (x, y) -> y)
@@ -150,24 +153,16 @@ let rectInPolygon v_edges h_edges (rect_c1, rect_c2) =
         isInPoly && (not rectIsCrossedVert) && (not rectIsCrossedHoriz)
     | true -> false 
 
-let rec findMaxArea h_edges v_edges calcedAreas maxArea  =
-    let _, _, cur_max_area = maxArea 
-    
-    match calcedAreas with
-    | [] -> maxArea
-    | h::t ->
-        let rect_c1, rect_c2, next_area = h
-        let nextMaxArea = next_area > cur_max_area
-        
-        if nextMaxArea then
-            let isValid = rectInPolygon v_edges h_edges (rect_c1, rect_c2)
-
-            if isValid then
-                findMaxArea h_edges v_edges t h
-            else      
-                findMaxArea h_edges v_edges t maxArea
+let findMaxArea h_edges v_edges (calcedAreas: ((int64 * int64) * (int64 * int64) * int64) array) =
+    let initial = calcedAreas.[0]
+    calcedAreas
+    |> Array.fold (fun maxArea (rect_c1, rect_c2, next_area) ->
+        let _, _, cur_max_area = maxArea
+        if next_area > cur_max_area && rectInPolygon v_edges h_edges (rect_c1, rect_c2) then
+            (rect_c1, rect_c2, next_area)
         else
-            findMaxArea h_edges v_edges t maxArea
+            maxArea)
+       initial
 
 let part2 inputData_a = 
     let v_edges = 
@@ -181,10 +176,10 @@ let part2 inputData_a =
     let areas =
         inputData_a
         |> pairwiseFold calcAreas
-        |> Seq.toList
+        |> Seq.toArray
     
-    let result = findMaxArea h_edges v_edges areas areas[0]
-
+    let result = findMaxArea h_edges v_edges areas
+    
     result
 
 #time
