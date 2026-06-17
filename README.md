@@ -126,3 +126,6 @@ Real: 00:00:00.031, CPU: 00:00:00.031, GC gen0: 1, gen1: 0, gen2: 0
 
 Part 2 result: ((6073L, 67455L), (94582L, 50408L), 1508918480L)
 Real: 00:00:00.534, CPU: 00:00:00.687, GC gen0: 2, gen1: 1, gen2: 0
+
+Part 2 result (after perf mods): ((6073L, 67455L), (94582L, 50408L), 1508918480L)
+Real: 00:00:00.382, CPU: 00:00:00.359, GC gen0: 3, gen1: 1, gen2: 1
