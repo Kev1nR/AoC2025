@@ -129,3 +129,39 @@ Real: 00:00:00.534, CPU: 00:00:00.687, GC gen0: 2, gen1: 1, gen2: 0
 
 Part 2 result (after perf mods): ((6073L, 67455L), (94582L, 50408L), 1508918480L)
 Real: 00:00:00.382, CPU: 00:00:00.359, GC gen0: 3, gen1: 1, gen2: 1
+
+
+## Day 10
+#### Synopsis
+Part 1: You are provided with a list of lights and buttons that toggle the lights off and on. The challenge is to find the fewest number of button presses that produce the expected sequence of Off/On lights.\
+**Example 1**
+[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1)
+
+I initially thought about treating this as a tree, test each combination of button presses until you hit the target. After a bit of research I was tempted byt the Gaussian Elimination approach that some had followed. Anyway, that seemed overly complex and I reverted to the Breadth Firast Search pattern I'd originally considered.\ 
+That approach was really quite straightforward. After I'd implemented a couple of helper parsers to convert the target state and button presses into `uint`s, it was a simple task to iterate through each line of input and apply the following approach (with a recursive function):
+1. Simulate the button press against the current light states (starting with "0000" (0u), for example). Keep track of how deep the tree is (`stage`).
+2. Check if there are any hits (could improve this by stopping 1. at the first hit)
+3. If there are set the result to `Some stage` which ends the loop.
+4. If not recurse with the new set of light states.\ **Note:** Because I'm tracking the `stage` I can just throw away the previous light states collection.
+
+Nice and easy. Now to the doubtless orders of magnitude more difficult part 2.
+
+#### Rating
+
+
+#### Time to complete
+2 - 3 hours. Fairly easy part 1.
+#### Execution time (includes data read)
+Part 1 result : 484
+Real: 00:00:00.274, CPU: 00:00:00.421, GC gen0: 2, gen1: 1, gen2: 0
+
+
+**Got sidetracked into MathJax Markdown syntax so keeping this for reference**
+In this case we take the buttons as out matrix A, the button press as xs and the bs as the lights state. 
+$$ Ax = b $$ 
+where 
+$$ A=\begin{bmatrix}
+1 & 2 & 3 \cr
+4 & 5 & 6
+\end{bmatrix}
+$$
