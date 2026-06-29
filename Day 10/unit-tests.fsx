@@ -53,7 +53,7 @@ let tests =
                 |> Seq.iter (fun (act, exp) ->
                     Expect.equal act exp "Expected act = exp")
 
-            testList "" [
+            testList "Complete run of SampleData yields the expected results" [
                 let lightsButtons = 
                     sampleData.Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries)
                     |> Seq.map (fun line -> line |> generateLightsandButtons)
@@ -67,6 +67,40 @@ let tests =
 
                         Expect.equal actual expected $"""Least buttons should be {expected}"""
             ]
+        ]
+    
+        testList "Part 2 tests" [
+            testCase "Can parse the joltage values" <| fun _ ->
+                let inputData = 
+                    sampleData.Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries)
+                    |> Array.map (fun s -> s|> generateButtonsAndJoltages)
+                    
+                let expected = 
+                    [|{ 
+                        ButtonStates = [|[|3|]; [|1; 3|]; [|2|]; [|2; 3|]; [|0; 2|]; [|0; 1|]|]
+                        JoltageStates = [|3; 5; 4; 7|] 
+                      };
+                      { 
+                        ButtonStates = [|[|0; 2; 3; 4|]; [|2; 3|]; [|0; 4|]; [|0; 1; 2|]; [|1; 2; 3; 4|]|]
+                        JoltageStates = [|7; 5; 12; 7; 2|] 
+                      };
+                      { 
+                        ButtonStates = [|[|0; 1; 2; 3; 4|]; [|0; 3; 4|]; [|0; 1; 2; 4; 5|]; [|1; 2|]|]
+                        JoltageStates = [|10; 11; 11; 5; 10; 5|] 
+                      }
+                    |]
+
+                Expect.equal inputData expected "Objects doe not match" 
+
+            ftestCase "Correctly process part 2" <| fun _ ->
+                let expected = [|10; 12; 11|]
+
+                let actual = 
+                    sampleData.Split(System.Environment.NewLine, System.StringSplitOptions.RemoveEmptyEntries)
+                    |> Array.map (fun s -> s|> generateButtonsAndJoltages)
+                    |> Array.map (getLeastButtonPressesForJoltages)
+
+                Expect.equal actual expected  "Expected value is 33"
         ]
     ]
 

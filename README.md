@@ -137,15 +137,19 @@ Part 1: You are provided with a list of lights and buttons that toggle the light
 **Example 1**
 [.##.] (3) (1,3) (2) (2,3) (0,2) (0,1)
 
-I initially thought about treating this as a tree, test each combination of button presses until you hit the target. After a bit of research I was tempted byt the Gaussian Elimination approach that some had followed. Anyway, that seemed overly complex and I reverted to the Breadth Firast Search pattern I'd originally considered.\ 
+I initially thought about treating this as a tree, test each combination of button presses until you hit the target. After a bit of research I was tempted byt the Gaussian Elimination approach that some had followed. Anyway, that seemed overly complex and I reverted to the Breadth First Search pattern I'd originally considered.\ 
 That approach was really quite straightforward. After I'd implemented a couple of helper parsers to convert the target state and button presses into `uint`s, it was a simple task to iterate through each line of input and apply the following approach (with a recursive function):
 1. Simulate the button press against the current light states (starting with "0000" (0u), for example). Keep track of how deep the tree is (`stage`).
 2. Check if there are any hits (could improve this by stopping 1. at the first hit)
-3. If there are set the result to `Some stage` which ends the loop.
-4. If not recurse with the new set of light states.\ **Note:** Because I'm tracking the `stage` I can just throw away the previous light states collection.
+3. If there are, set the result to `Some stage` which ends the loop.
+4. If not recurse with the new set of light states.\ 
+   **Note:** Because I'm tracking the `stage` I can just throw away the previous light states collection.
 
 Nice and easy. Now to the doubtless orders of magnitude more difficult part 2.
 
+Part 2: Actually, on the face of it this seems rather simple. Basically the same as Part 1 - we'll see.
+- Following the earlier approach worked fine for the sample data, however, it does not seem very scalable. I kicked it off agains the full data and it was stil running 2 hours later - abandoned and re-thinking.
+ 
 #### Rating
 
 

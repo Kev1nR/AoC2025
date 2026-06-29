@@ -12,6 +12,12 @@ type LightsButtons =
         LightButtons: uint array    
     }
 
+type ButtonsJoltages =
+    {
+        ButtonStates: int array array
+        JoltageStates: int array
+    }
+
 let lightStateToBits (lightStateString : string) = 
     let binStr = 
         (lightStateString[1..(lightStateString.Length - 2)]) // extract light state as .s and #s
@@ -54,6 +60,30 @@ let generateLightsandButtons (input : string) =
         LightButtons = buttonStates
     }
 
+let generateButtonsAndJoltages (input : string) =
+    let splitInput = input.Split(" ")
+    
+    let buttonStates = 
+        splitInput
+        |> Array.filter (fun s -> s.StartsWith("("))
+        |> Array.map (fun s -> s.Substring(1, s.Length - 2))
+        |> Array.map (fun s ->
+            s.Split(",")
+            |> Array.map (int))
+    
+    let joltages =
+        splitInput
+        |> Array.filter (fun s -> s.StartsWith("{"))
+        |> Array.head
+        |> fun s -> 
+            s.Substring(1, s.Length - 2)
+             .Split(",")
+        |> Array.map (int)     
+    {
+        ButtonStates = buttonStates
+        JoltageStates = joltages
+    }
+
 let getLeastButtonPresses targetStateUint buttonStates =
     let rec bfs lightStates stage found =
         match found with
@@ -72,6 +102,33 @@ let getLeastButtonPresses targetStateUint buttonStates =
             
     bfs [0u] 0 None
 
+let getLeastButtonPressesForJoltages buttonsJoltages =
+    let rec bfs (joltages: int array array) (stage: int) found =
+        match found with
+        | Some buttonPresses -> buttonPresses
+        | None ->
+            let nextJoltageStates = 
+                joltages
+                |> Seq.allPairs buttonsJoltages.ButtonStates // buttonStates
+                |> Seq.choose (fun ((bs: int array), js) -> 
+                        let jsnew = Array.copy js
+                        
+                        let mutable skip = false
+                        for i in bs do
+                            jsnew[i] <- jsnew[i] + 1
+                            skip <- jsnew[i] > buttonsJoltages.JoltageStates[i] 
+
+                        if skip then None else Some jsnew)
+                |> Seq.toArray
+
+            let hit =
+                nextJoltageStates |> Seq.contains buttonsJoltages.JoltageStates
+
+            bfs nextJoltageStates (stage + 1) (if hit then Some (stage + 1) else None)
+    
+    let initState = Array.zeroCreate (buttonsJoltages.JoltageStates.Length) 
+    bfs [|initState|] 0 None
+
 let part1 () =
     filePath
     |> ReadData.readLines
@@ -80,10 +137,18 @@ let part1 () =
         getLeastButtonPresses lbs.ExpectedLightState lbs.LightButtons
     )
     |> Seq.sum   
-    
+
+let part2 () =
+    filePath
+    |> ReadData.readLines
+    |> Seq.map (fun s -> s|> generateButtonsAndJoltages)
+    |> Seq.map (getLeastButtonPressesForJoltages)
+    |> Seq.sum
+
 #time
 part1 () |> printfn "Part 1 result : %d" 
 #time 
 
 #time
+part2 () |> printfn "Part 2 result : %d" 
 #time
